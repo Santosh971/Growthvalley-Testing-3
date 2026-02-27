@@ -64,7 +64,7 @@ async function refreshAccessToken(): Promise<string | null> {
     });
 
     const data = await response.json();
-    
+
     if (data.success) {
       setToken(data.data.accessToken);
       setRefreshToken(data.data.refreshToken);
@@ -73,21 +73,67 @@ async function refreshAccessToken(): Promise<string | null> {
   } catch (error) {
     console.error('Token refresh failed:', error);
   }
-  
+
   // Refresh failed, clear tokens
   removeToken();
   return null;
 }
 
 // API request helper with auto-refresh
-async function apiRequest(endpoint: string, options: RequestInit = {}, retry = true): Promise<any> {
+// async function apiRequest(endpoint: string, options: RequestInit = {}, retry = true): Promise<any> {
+//   const token = getToken();
+
+//   const headers: HeadersInit = {
+//     'Content-Type': 'application/json',
+//     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//     ...options.headers,
+//   };
+
+//   const response = await fetch(`${API_URL}${endpoint}`, {
+//     ...options,
+//     headers,
+//   });
+
+//   const data = await response.json();
+
+//   // Handle token expiration
+//   if (response.status === 401 && data.message?.includes('Token expired') && retry) {
+//     const newToken = await refreshAccessToken();
+//     if (newToken) {
+//       // Retry with new token
+//       return apiRequest(endpoint, options, false);
+//     } else {
+//       // Redirect to login
+//       if (typeof window !== 'undefined') {
+//         window.location.href = '/login';
+//       }
+//       throw new Error('Session expired. Please login again.');
+//     }
+//   }
+
+//   if (!response.ok) {
+//     throw new Error(data.message || data.error || 'API request failed');
+//   }
+
+//   return data;
+// }
+async function apiRequest(
+  endpoint: string,
+  options: RequestInit & { isFormData?: boolean } = {},
+  retry = true
+): Promise<any> {
+
   const token = getToken();
-  
+
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
+
+  // ✅ Only set JSON header when NOT FormData
+  if (!options.isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
@@ -96,14 +142,13 @@ async function apiRequest(endpoint: string, options: RequestInit = {}, retry = t
 
   const data = await response.json();
 
-  // Handle token expiration
+  // Token refresh logic
   if (response.status === 401 && data.message?.includes('Token expired') && retry) {
     const newToken = await refreshAccessToken();
+
     if (newToken) {
-      // Retry with new token
       return apiRequest(endpoint, options, false);
     } else {
-      // Redirect to login
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
       }
@@ -350,17 +395,21 @@ export const testimonialAPI = {
     return apiRequest(`/api/testimonials/${id}`);
   },
 
-  create: async (data: any) => {
+
+  create: async (data: FormData) => {
     return apiRequest('/api/testimonials', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: data,
+      isFormData: true,
     });
   },
 
-  update: async (id: string, data: any) => {
+
+  update: async (id: string, data: FormData) => {
     return apiRequest(`/api/testimonials/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: data,
+      isFormData: true,
     });
   },
 

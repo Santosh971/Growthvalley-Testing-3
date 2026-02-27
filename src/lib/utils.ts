@@ -21,3 +21,9 @@ export function truncate(text: string, length: number): string {
   if (text.length <= length) return text;
   return text.slice(0, length).trim() + '...';
 }
+// frontend/utils/getImageUrl.ts
+export const getImageUrl = (path?: string) => {
+  if (!path) return ''; // fallback if no image
+  if (path.startsWith('http')) return path; // full URL already
+  return `${process.env.NEXT_PUBLIC_API_URL}${path}`; // prepend backend URL
+};

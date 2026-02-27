@@ -1,19 +1,22 @@
 const Testimonial = require('../models/Testimonial');
-
+const { getFileUrl } = require('../middleware/upload');
+const {
+  deleteFile
+} = require("../middleware/upload");
 // @desc    Get all testimonials (public)
 // @route   GET /api/testimonials
 // @access  Public
 exports.getTestimonials = async (req, res) => {
   try {
     const { status, featured } = req.query;
-    
+
     let query = {};
     if (status) query.status = status;
     if (featured === 'true') query.featured = true;
-    
+
     const testimonials = await Testimonial.find(query)
       .sort({ order: 1, createdAt: -1 });
-    
+
     res.json({
       success: true,
       data: testimonials
@@ -33,14 +36,14 @@ exports.getTestimonials = async (req, res) => {
 exports.getTestimonial = async (req, res) => {
   try {
     const testimonial = await Testimonial.findById(req.params.id);
-    
+
     if (!testimonial) {
       return res.status(404).json({
         success: false,
         message: 'Testimonial not found'
       });
     }
-    
+
     res.json({
       success: true,
       data: testimonial
@@ -62,7 +65,7 @@ exports.getAdminTestimonials = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
-    
+
     const [testimonials, total] = await Promise.all([
       Testimonial.find()
         .sort({ order: 1, createdAt: -1 })
@@ -70,7 +73,7 @@ exports.getAdminTestimonials = async (req, res) => {
         .limit(limit),
       Testimonial.countDocuments()
     ]);
-    
+
     res.json({
       success: true,
       data: testimonials,
@@ -93,36 +96,62 @@ exports.getAdminTestimonials = async (req, res) => {
 // @desc    Create testimonial
 // @route   POST /api/testimonials
 // @access  Private (Admin)
+
+
+
+
+
 exports.createTestimonial = async (req, res) => {
   try {
-    const { quote, author, designation, company, avatar, rating, featured, status } = req.body;
-    
-    // Get max order for new testimonial
-    const maxOrder = await Testimonial.findOne().sort({ order: -1 }).select('order');
+    const {
+      quote,
+      author,
+      designation,
+      company,
+      rating,
+      featured,
+      status
+    } = req.body;
+
+    // ✅ Auto Order
+    const maxOrder = await Testimonial.findOne()
+      .sort({ order: -1 })
+      .select("order");
+
     const order = (maxOrder?.order || 0) + 1;
-    
+
+    // ✅ Generate avatar URL correctly
+    let avatar = null;
+
+    if (req.file) {
+      avatar = getFileUrl(req, req.file.path);
+    }
+
+    // ✅ Create testimonial
     const testimonial = await Testimonial.create({
       quote,
       author,
       designation,
       company,
       avatar,
-      rating: rating || 5,
-      featured: featured || false,
-      status: status || 'active',
-      order
+      rating: Number(rating) || 5,
+      featured: featured === "true" || featured === true,
+      status: status || "active",
+      order,
     });
-    
-    res.status(201).json({
+
+    return res.status(201).json({
       success: true,
       data: testimonial,
-      message: 'Testimonial created successfully'
+      message: "Testimonial created successfully",
     });
+
   } catch (error) {
-    console.error('Create testimonial error:', error);
-    res.status(500).json({
+    console.error("Create Testimonial Error:", error);
+
+    return res.status(500).json({
       success: false,
-      message: error.message || 'Failed to create testimonial'
+      message: "Failed to create testimonial",
     });
   }
 };
@@ -130,42 +159,85 @@ exports.createTestimonial = async (req, res) => {
 // @desc    Update testimonial
 // @route   PUT /api/testimonials/:id
 // @access  Private (Admin)
+
+
+
 exports.updateTestimonial = async (req, res) => {
   try {
-    const { quote, author, designation, company, avatar, rating, featured, status, order } = req.body;
-    
     const testimonial = await Testimonial.findById(req.params.id);
-    
+
+    console.log("Update Testimonial : ", res)
     if (!testimonial) {
       return res.status(404).json({
         success: false,
-        message: 'Testimonial not found'
+        message: "Testimonial not found",
       });
     }
-    
-    // Update fields
+
+    const {
+      quote,
+      author,
+      designation,
+      company,
+      rating,
+      featured,
+      status,
+      order,
+    } = req.body;
+
+    // ✅ Update fields safely
     if (quote !== undefined) testimonial.quote = quote;
     if (author !== undefined) testimonial.author = author;
     if (designation !== undefined) testimonial.designation = designation;
     if (company !== undefined) testimonial.company = company;
-    if (avatar !== undefined) testimonial.avatar = avatar;
-    if (rating !== undefined) testimonial.rating = rating;
-    if (featured !== undefined) testimonial.featured = featured;
-    if (status !== undefined) testimonial.status = status;
-    if (order !== undefined) testimonial.order = order;
-    
+
+    if (rating !== undefined) {
+      testimonial.rating = Number(rating);
+    }
+
+    if (featured !== undefined) {
+      testimonial.featured =
+        featured === true || featured === "true";
+    }
+
+    if (status !== undefined) {
+      testimonial.status = status;
+    }
+
+    if (order !== undefined) {
+      testimonial.order = Number(order);
+    }
+
+
+
+    if (req.file) {
+      try {
+        // ✅ delete old image
+        if (testimonial.avatar) {
+          await deleteFile(testimonial.avatar);
+        }
+      } catch (err) {
+        console.log("Old avatar delete skipped");
+      }
+
+      // ✅ generate correct URL automatically
+      testimonial.avatar = getFileUrl(req, req.file.path);
+    }
+
     await testimonial.save();
-    
-    res.json({
+
+    return res.status(200).json({
       success: true,
       data: testimonial,
-      message: 'Testimonial updated successfully'
+      message: "Testimonial updated successfully",
     });
+
   } catch (error) {
-    console.error('Update testimonial error:', error);
-    res.status(500).json({
+    console.error("Update testimonial error:", error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Failed to update testimonial'
+      message: "Failed to update testimonial",
     });
   }
 };
@@ -176,16 +248,16 @@ exports.updateTestimonial = async (req, res) => {
 exports.deleteTestimonial = async (req, res) => {
   try {
     const testimonial = await Testimonial.findById(req.params.id);
-    
+
     if (!testimonial) {
       return res.status(404).json({
         success: false,
         message: 'Testimonial not found'
       });
     }
-    
+
     await testimonial.deleteOne();
-    
+
     res.json({
       success: true,
       message: 'Testimonial deleted successfully'
@@ -205,13 +277,13 @@ exports.deleteTestimonial = async (req, res) => {
 exports.reorderTestimonials = async (req, res) => {
   try {
     const { orders } = req.body; // Array of { id, order }
-    
-    const updatePromises = orders.map(({ id, order }) => 
+
+    const updatePromises = orders.map(({ id, order }) =>
       Testimonial.findByIdAndUpdate(id, { order }, { new: true })
     );
-    
+
     await Promise.all(updatePromises);
-    
+
     res.json({
       success: true,
       message: 'Testimonials reordered successfully'

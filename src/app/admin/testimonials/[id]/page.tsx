@@ -24,7 +24,7 @@ export default function EditTestimonialPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     quote: '',
     author: '',
@@ -64,33 +64,81 @@ export default function EditTestimonialPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
+    setAvatarFile(file);
 
-    try {
-      const response = await mediaAPI.upload(file, 'testimonials');
-      if (response.success) {
-        setFormData(prev => ({ ...prev, avatar: response.data.url }));
-      }
-    } catch (error: any) {
-      alert(error.message || 'Upload failed');
-    } finally {
-      setUploading(false);
-    }
+    // preview only
+    setFormData(prev => ({
+      ...prev,
+      avatar: URL.createObjectURL(file)
+    }));
   };
+
+  //   if (!file) return;
+
+  //   setUploading(true);
+
+  //   try {
+  //     const response = await mediaAPI.upload(file, 'testimonials');
+  //     if (response.success) {
+  //       setFormData(prev => ({ ...prev, avatar: response.data.url }));
+  //     }
+  //   } catch (error: any) {
+  //     alert(error.message || 'Upload failed');
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setSaving(true);
+
+  //   try {
+  //     const response = await testimonialAPI.update(params.id as string, formData);
+  //     if (response.success) {
+  //       router.push('/admin/testimonials');
+  //     }
+  //   } catch (error: any) {
+  //     alert(error.message || 'Failed to update testimonial');
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      const response = await testimonialAPI.update(params.id as string, formData);
+      const data = new FormData();
+
+      data.append('quote', formData.quote);
+      data.append('author', formData.author);
+      data.append('designation', formData.designation);
+      data.append('company', formData.company);
+      data.append('rating', String(formData.rating));
+      data.append('featured', String(formData.featured));
+      data.append('status', formData.status);
+
+
+      if (avatarFile) {
+        data.append('avatar', avatarFile);
+      }
+
+      const response = await testimonialAPI.update(
+        params.id as string,
+        data
+      );
+
       if (response.success) {
         router.push('/admin/testimonials');
       }
+
     } catch (error: any) {
       alert(error.message || 'Failed to update testimonial');
     } finally {
@@ -136,7 +184,7 @@ export default function EditTestimonialPage() {
             {/* Author Info */}
             <div className="bg-white dark:bg-brand-grey-900 p-6 rounded-lg border border-brand-grey-200 dark:border-brand-grey-800">
               <h2 className="text-lg font-semibold text-brand-black dark:text-white mb-4">Author Information</h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-brand-black dark:text-white mb-2">Name *</label>
@@ -176,7 +224,12 @@ export default function EditTestimonialPage() {
                   <div className="border-2 border-dashed border-brand-grey-300 dark:border-brand-grey-700 rounded-lg p-6 text-center">
                     {formData.avatar ? (
                       <div className="relative inline-block">
-                        <img src={formData.avatar} alt="Avatar" className="w-24 h-24 object-cover rounded-full" />
+                        {/* <img src={formData.avatar} alt="Avatar" className="w-24 h-24 object-cover rounded-full" /> */}
+                        <img
+                          src={`http://localhost:3001${formData.avatar}`}
+                          alt="Avatar"
+                          className="w-24 h-24 object-cover rounded-full"
+                        />
                         <button
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, avatar: '' }))}

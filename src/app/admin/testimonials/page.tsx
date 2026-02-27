@@ -32,6 +32,7 @@ export default function TestimonialsListPage() {
   const loadTestimonials = async () => {
     try {
       const response = await testimonialAPI.getAll();
+      console.log("Testimonial s : ", response)
       setTestimonials(response.data || []);
     } catch (error) {
       console.error('Failed to load testimonials:', error);
@@ -42,7 +43,7 @@ export default function TestimonialsListPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this testimonial?')) return;
-    
+
     try {
       await testimonialAPI.delete(id);
       loadTestimonials();
@@ -60,6 +61,18 @@ export default function TestimonialsListPage() {
     }
   };
 
+  const getImageUrl = (path?: string) => {
+    if (!path) return ''; // fallback if no image
+    if (path.startsWith('http')) return path; // already full URL
+
+    // If running on localhost, use localhost backend
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ||
+      (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:3001'
+        : 'https://your-live-domain.com');
+
+    return `${baseUrl}${path}`;
+  };
   const toggleStatus = async (id: string, status: string) => {
     try {
       await testimonialAPI.update(id, { status: status === 'active' ? 'inactive' : 'active' });
@@ -126,10 +139,21 @@ export default function TestimonialsListPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {testimonial.avatar && (
-                          <img src={testimonial.avatar} alt={testimonial.author} className="w-10 h-10 rounded-full object-cover" />
+                          // <img src={testimonial.avatar} alt={testimonial.author} className="w-10 h-10 rounded-full object-cover" />
+                          // <img
+                          //   src={`http://localhost:3001${testimonial.avatar}`}
+                          //   alt={testimonial.author}
+                          //   className="w-10 h-10 rounded-full object-cover"
+                          // />
+
+                          <img
+                            src={getImageUrl(testimonial.avatar)}
+                            alt={testimonial.author}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
                         )}
                         <div>
-                          <p className="font-medium text-brand-black dark:text-white line-clamp-1">{testimonial.quote.substring(0, 60)}...</p>
+                          <p className="font-medium text-brand-black dark:text-white line-clamp-1">{testimonial.quote.substring(0, 60)}</p>
                           {testimonial.featured && (
                             <span className="px-2 py-0.5 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded">Featured</span>
                           )}
@@ -152,11 +176,10 @@ export default function TestimonialsListPage() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => toggleStatus(testimonial._id, testimonial.status)}
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          testimonial.status === 'active' 
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
-                            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                        }`}
+                        className={`px-2 py-1 text-xs rounded-full ${testimonial.status === 'active'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                          }`}
                       >
                         {testimonial.status}
                       </button>
@@ -165,11 +188,10 @@ export default function TestimonialsListPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => toggleFeatured(testimonial._id, testimonial.featured)}
-                          className={`px-3 py-1 text-sm rounded transition-colors ${
-                            testimonial.featured 
-                              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' 
-                              : 'bg-brand-grey-100 dark:bg-brand-grey-700 text-brand-black dark:text-white'
-                          }`}
+                          className={`px-3 py-1 text-sm rounded transition-colors ${testimonial.featured
+                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                            : 'bg-brand-grey-100 dark:bg-brand-grey-700 text-brand-black dark:text-white'
+                            }`}
                         >
                           {testimonial.featured ? '★ Featured' : 'Feature'}
                         </button>

@@ -10,7 +10,7 @@ export default function NewTestimonialPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     quote: '',
     author: '',
@@ -22,6 +22,24 @@ export default function NewTestimonialPage() {
     status: 'active',
   });
 
+  // const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+
+  //   setUploading(true);
+
+  //   try {
+  //     const response = await mediaAPI.upload(file, 'testimonials');
+  //     if (response.success) {
+  //       setFormData(prev => ({ ...prev, avatar: response.data.url }));
+  //     }
+  //   } catch (error: any) {
+  //     alert(error.message || 'Upload failed');
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -29,23 +47,54 @@ export default function NewTestimonialPage() {
     setUploading(true);
 
     try {
-      const response = await mediaAPI.upload(file, 'testimonials');
-      if (response.success) {
-        setFormData(prev => ({ ...prev, avatar: response.data.url }));
-      }
+      setAvatarFile(file);
+
+      // preview image
+      const preview = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, avatar: preview }));
+
     } catch (error: any) {
-      alert(error.message || 'Upload failed');
+      alert('Upload failed');
     } finally {
       setUploading(false);
     }
   };
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setSaving(true);
+
+  //   try {
+  //     const response = await testimonialAPI.create(formData);
+  //     if (response.success) {
+  //       router.push('/admin/testimonials');
+  //     }
+  //   } catch (error: any) {
+  //     alert(error.message || 'Failed to create testimonial');
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      const response = await testimonialAPI.create(formData);
+      const form = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key !== 'avatar') {
+          form.append(key, String(value));
+        }
+      });
+
+      if (avatarFile) {
+        form.append('avatar', avatarFile);
+      }
+
+      const response = await testimonialAPI.create(form);
+
       if (response.success) {
         router.push('/admin/testimonials');
       }
@@ -55,6 +104,7 @@ export default function NewTestimonialPage() {
       setSaving(false);
     }
   };
+
 
   return (
     <AdminLayout>
@@ -85,7 +135,7 @@ export default function NewTestimonialPage() {
             {/* Author Info */}
             <div className="bg-white dark:bg-brand-grey-900 p-6 rounded-lg border border-brand-grey-200 dark:border-brand-grey-800">
               <h2 className="text-lg font-semibold text-brand-black dark:text-white mb-4">Author Information</h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-brand-black dark:text-white mb-2">Name *</label>
@@ -225,3 +275,4 @@ export default function NewTestimonialPage() {
     </AdminLayout>
   );
 }
+

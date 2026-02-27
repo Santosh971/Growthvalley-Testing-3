@@ -6,6 +6,7 @@ import { teamAPI } from '@/lib/admin-api';
 import { useAuth } from '@/lib/auth-context';
 import AdminLayout from '../AdminLayout';
 
+
 interface TeamMember {
   _id: string;
   name: string;
@@ -16,6 +17,19 @@ interface TeamMember {
   linkedin?: string;
   twitter?: string;
 }
+
+const getImageUrl = (path?: string) => {
+  if (!path) return ''; // fallback if no image
+  if (path.startsWith('http')) return path; // already full URL
+
+  // If running on localhost, use localhost backend
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ||
+    (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      ? 'http://localhost:3001'
+      : 'https://your-live-domain.com');
+
+  return `${baseUrl}${path}`;
+};
 
 export default function TeamListPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -39,7 +53,7 @@ export default function TeamListPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this team member?')) return;
-    
+
     try {
       await teamAPI.delete(id);
       loadMembers();
@@ -112,8 +126,14 @@ export default function TeamListPage() {
                 {/* Image */}
                 <div className="aspect-square bg-brand-grey-100 dark:bg-brand-grey-800 relative">
                   {member.image ? (
+                    // <img
+                    //   src={member.image}
+                    //   alt={member.name}
+                    //   className="w-full h-full object-cover"
+                    // />
+
                     <img
-                      src={member.image}
+                      src={getImageUrl(member.image)}
                       alt={member.name}
                       className="w-full h-full object-cover"
                     />
@@ -125,40 +145,39 @@ export default function TeamListPage() {
                     </div>
                   )}
                   {/* Status Badge */}
-                  <span className={`absolute top-2 right-2 px-2 py-1 text-xs rounded-full ${
-                    member.status === 'active' 
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
-                      : 'bg-grey-100 dark:bg-brand-grey-700 text-brand-grey-700 dark:text-brand-grey-300'
-                  }`}>
+                  <span className={`absolute top-2 right-2 px-2 py-1 text-xs rounded-full ${member.status === 'active'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                    : 'bg-grey-100 dark:bg-brand-grey-700 text-brand-grey-700 dark:text-brand-grey-300'
+                    }`}>
                     {member.status}
                   </span>
                 </div>
-                
+
                 {/* Info */}
                 <div className="p-4">
                   <h3 className="font-semibold text-brand-black dark:text-white truncate">{member.name}</h3>
                   <p className="text-sm text-brand-grey-500 dark:text-brand-grey-400 truncate">{member.role}</p>
-                  
+
                   {/* Social Links */}
                   {(member.linkedin || member.twitter) && (
                     <div className="flex gap-2 mt-2">
                       {member.linkedin && (
                         <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-brand-grey-400 hover:text-accent">
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                           </svg>
                         </a>
                       )}
                       {member.twitter && (
                         <a href={member.twitter} target="_blank" rel="noopener noreferrer" className="text-brand-grey-400 hover:text-accent">
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                           </svg>
                         </a>
                       )}
                     </div>
                   )}
-                  
+
                   {/* Actions */}
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-brand-grey-200 dark:border-brand-grey-700">
                     <div className="flex gap-2">
