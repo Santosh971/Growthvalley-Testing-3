@@ -75,11 +75,24 @@ app.use(
   })
 );
 // CORS configuration
+// app.use(cors({
+//   origin: config.nodeEnv === 'production'
+//     ? [config.frontendUrl, /\.growthvalley\.(in|com)$/]
+//     : true,
+//   // : config.frontendUrl,
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Accept', 'Origin'],
+// }));
+
+
+
 app.use(cors({
-  origin: config.nodeEnv === 'production'
-    ? [config.frontendUrl, /\.growthvalley\.(in|com)$/]
-    : true,
-  // : config.frontendUrl,
+  origin: [
+    "http://localhost:3000",
+    "https://growth-valley-testing.vercel.app",
+    /\.vercel\.app$/
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Accept', 'Origin'],
