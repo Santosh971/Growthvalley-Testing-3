@@ -61,7 +61,7 @@ export default function ContactClient({ form, info, contactInfo, expectations, s
     {
       icon: "📞",
       label: "Phone",
-      value: getContactValue(contactInfo?.phone),
+      value: getContactValue(contactInfo?.phone || "+91 00000 00000"), // 👈 add default here
     },
     {
       icon: "📍",
@@ -175,25 +175,25 @@ export default function ContactClient({ form, info, contactInfo, expectations, s
               title: typeof expectations?.title === 'string' ? expectations.title : "What to Expect",
               items: Array.isArray(expectations?.items)
                 ? expectations.items
-                    .filter(item => item !== null && item !== undefined)
-                    .map(item => {
-                      if (typeof item === 'string') return item;
-                      if (typeof item === 'number') return String(item);
-                      // Handle objects that might have been accidentally stored
-                      if (typeof item === 'object' && item !== null) {
-                        if (item.value) return String(item.value);
-                        if (item.text) return String(item.text);
-                        return '';
-                      }
+                  .filter(item => item !== null && item !== undefined)
+                  .map(item => {
+                    if (typeof item === 'string') return item;
+                    if (typeof item === 'number') return String(item);
+                    // Handle objects that might have been accidentally stored
+                    if (typeof item === 'object' && item !== null) {
+                      if (item.value) return String(item.value);
+                      if (item.text) return String(item.text);
                       return '';
-                    })
-                    .filter(item => item !== '') // Remove empty strings from conversion
+                    }
+                    return '';
+                  })
+                  .filter(item => item !== '') // Remove empty strings from conversion
                 : [
-                    "Response within one business day",
-                    "Initial discovery call to understand your situation",
-                    "Clear proposal with scope, timeline, and investment",
-                    "No commitment required for initial conversation",
-                  ],
+                  "Response within one business day",
+                  "Initial discovery call to understand your situation",
+                  "Clear proposal with scope, timeline, and investment",
+                  "No commitment required for initial conversation",
+                ],
             }}
             successMessage={{
               title: successMessage?.title || "Message Received",
