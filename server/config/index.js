@@ -7,7 +7,6 @@ module.exports = {
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 
   // Database
-  // mongodbUri: process.env.MONGODB_URI || `mongodb+srv://doctor_management:Tejas@mycluster.qetrmfc.mongodb.net/growthvalley`,
   mongodbUri: process.env.MONGODB_URI || `mongodb+srv://santoshshimpankar61_db_user:1P5ckPjwLsocWExN@cluster0.tioxubx.mongodb.net/`,
 
   // JWT
@@ -19,21 +18,13 @@ module.exports = {
   adminEmail: process.env.ADMIN_EMAIL || 'admin@growthvalley.com',
   adminPassword: process.env.ADMIN_PASSWORD || 'ChangeThisPassword123!',
 
-  // Email
-  // smtp: {
-  //   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  //   port: parseInt(process.env.SMTP_PORT, 10) || 587,
-  //   user: process.env.SMTP_USER || '',
-  //   pass: process.env.SMTP_PASS || '',
-  //   from: process.env.EMAIL_FROM || 'Growth Valley <noreply@growthvalley.com>'
-  // },
-
+  // Email/SMTP Configuration - Uses environment variables
   smtp: {
-    host: `smtp.gmail.com`,
-    port: 587,
-    user: 'abhishekgangurde046@gmail.com',
-    pass: 'yehx pbja nawo qpye',
-    from: 'abhishekgangurde046@gmail.com'
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT, 10) || 587,
+    user: process.env.SMTP_USER || 'abhishekgangurde046@gmail.com',
+    pass: process.env.SMTP_PASS || 'yehx pbja nawo qpye',
+    from: process.env.SMTP_FROM || process.env.SMTP_USER || 'abhishekgangurde046@gmail.com'
   },
 
   // Password Reset
