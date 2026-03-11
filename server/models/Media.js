@@ -10,6 +10,11 @@ const mediaSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Original filename is required']
   },
+  // Cloudinary public_id for deletion
+  publicId: {
+    type: String,
+    default: null
+  },
   path: {
     type: String,
     required: [true, 'File path is required']

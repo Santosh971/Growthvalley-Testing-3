@@ -1,5 +1,6 @@
 const TeamMember = require('../models/TeamMember');
-const { getFullFileUrl } = require('../middleware/upload');
+const { deleteFile } = require('../middleware/upload');
+
 // @desc    Get all team members
 // @route   GET /api/team
 // @access  Public
@@ -61,41 +62,16 @@ exports.getTeamMember = async (req, res) => {
 // @desc    Create team member
 // @route   POST /api/team
 // @access  Private (Admin)
-// exports.createTeamMember = async (req, res) => {
-//   try {
-//     const member = await TeamMember.create(req.body);
-
-//     res.status(201).json({
-//       success: true,
-//       data: member,
-//       message: 'Team member created successfully',
-//     });
-//   } catch (error) {
-//     console.error('Create team member error:', error);
-
-//     if (error.name === 'ValidationError') {
-//       const messages = Object.values(error.errors).map(e => e.message);
-//       return res.status(400).json({
-//         success: false,
-//         message: messages.join(', '),
-//       });
-//     }
-
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to create team member',
-//     });
-//   }
-// };
 
 exports.createTeamMember = async (req, res) => {
   try {
     console.log("Member Response : ", req);
     const data = { ...req.body };
 
-    // ✅ Handle Image Upload
+    // Handle Image Upload - Cloudinary returns URL in req.file.path
     if (req.file) {
-      data.image = getFullFileUrl(req, req.file.path);
+      // req.file.path contains the Cloudinary secure_url
+      data.image = req.file.path;
     }
 
     const member = await TeamMember.create(data);
@@ -130,11 +106,7 @@ exports.createTeamMember = async (req, res) => {
 // @access  Private (Admin)
 exports.updateTeamMember = async (req, res) => {
   try {
-    const member = await TeamMember.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const member = await TeamMember.findById(req.params.id);
     console.log("Team Members : ", member);
     if (!member) {
       return res.status(404).json({
@@ -142,6 +114,27 @@ exports.updateTeamMember = async (req, res) => {
         message: 'Team member not found',
       });
     }
+
+    // Handle image upload if new file is provided
+    if (req.file) {
+      // Delete old image from Cloudinary if exists
+      if (member.image) {
+        try {
+          await deleteFile(member.image);
+        } catch (err) {
+          console.log("Old image delete skipped");
+        }
+      }
+      // Set new image URL from Cloudinary
+      req.body.image = req.file.path;
+    }
+
+    // Update fields
+    Object.keys(req.body).forEach(key => {
+      member[key] = req.body[key];
+    });
+
+    await member.save();
 
     res.json({
       success: true,
@@ -171,7 +164,7 @@ exports.updateTeamMember = async (req, res) => {
 // @access  Private (Admin)
 exports.deleteTeamMember = async (req, res) => {
   try {
-    const member = await TeamMember.findByIdAndDelete(req.params.id);
+    const member = await TeamMember.findById(req.params.id);
     console.log("Team Members : ", member);
     if (!member) {
       return res.status(404).json({
@@ -179,6 +172,17 @@ exports.deleteTeamMember = async (req, res) => {
         message: 'Team member not found',
       });
     }
+
+    // Delete image from Cloudinary if exists
+    if (member.image) {
+      try {
+        await deleteFile(member.image);
+      } catch (err) {
+        console.log("Image delete skipped");
+      }
+    }
+
+    await member.deleteOne();
 
     res.json({
       success: true,

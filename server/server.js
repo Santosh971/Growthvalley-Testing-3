@@ -51,17 +51,19 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
 
-        // ⭐ FIX HERE
+        // Allow Cloudinary URLs for images
         imgSrc: [
           "'self'",
           "data:",
           "https:",
-          "http://localhost:3001"
+          "http://localhost:3001",
+          "https://res.cloudinary.com"
         ],
 
         connectSrc: [
           "'self'",
-          "http://localhost:3001"
+          "http://localhost:3001",
+          "https://res.cloudinary.com"
         ],
 
         fontSrc: ["'self'"],

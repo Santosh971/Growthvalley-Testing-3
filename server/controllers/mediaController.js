@@ -1,7 +1,5 @@
 const { Media } = require('../models');
-const fs = require('fs');
-const path = require('path');
-const config = require('../config');
+const { deleteByPublicId } = require('../middleware/upload');
 
 // @desc    Upload media file
 // @route   POST /api/admin/media
@@ -17,16 +15,18 @@ exports.uploadMedia = async (req, res) => {
 
     const { folder = 'general', alt = '', caption = '' } = req.body;
 
-    // Extract the relative URL from the full path (e.g., uploads/images/file.png -> /uploads/images/file.png)
-    const relativePath = req.file.path.replace(/\\/g, '/'); // Normalize path separators
-    const urlIndex = relativePath.indexOf('uploads/');
-    const url = urlIndex !== -1 ? '/' + relativePath.substring(urlIndex) : `/uploads/${req.file.filename}`;
+    // Cloudinary returns the file info in req.file
+    // req.file.path contains the secure_url
+    // req.file.filename contains the public_id
+    const fileUrl = req.file.path; // Cloudinary secure_url
+    const publicId = req.file.filename; // Cloudinary public_id
 
     const media = await Media.create({
       filename: req.file.filename,
       originalName: req.file.originalname,
-      path: req.file.path,
-      url: url,
+      publicId: publicId,
+      path: fileUrl, // Store Cloudinary URL as path for backward compatibility
+      url: fileUrl,
       mimeType: req.file.mimetype,
       size: req.file.size,
       alt,
@@ -42,10 +42,6 @@ exports.uploadMedia = async (req, res) => {
     });
   } catch (error) {
     console.error('Upload media error:', error);
-    // Clean up uploaded file if database save fails
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     res.status(500).json({
       success: false,
       error: 'Failed to upload file',
@@ -186,10 +182,14 @@ exports.deleteMedia = async (req, res) => {
       });
     }
 
-    // Delete file from disk
-    const filePath = path.join(__dirname, '..', 'uploads', media.filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Delete from Cloudinary using publicId
+    if (media.publicId) {
+      try {
+        await deleteByPublicId(media.publicId);
+      } catch (cloudinaryError) {
+        console.error('Failed to delete from Cloudinary:', cloudinaryError);
+        // Continue with database deletion even if Cloudinary fails
+      }
     }
 
     await media.deleteOne();

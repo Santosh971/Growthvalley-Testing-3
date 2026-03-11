@@ -7,7 +7,8 @@ module.exports = {
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 
   // Database
-  mongodbUri: process.env.MONGODB_URI || `mongodb+srv://doctor_management:Tejas@mycluster.qetrmfc.mongodb.net/growthvalley`,
+  // mongodbUri: process.env.MONGODB_URI || `mongodb+srv://doctor_management:Tejas@mycluster.qetrmfc.mongodb.net/growthvalley`,
+  mongodbUri: process.env.MONGODB_URI || `mongodb+srv://santoshshimpankar61_db_user:1P5ckPjwLsocWExN@cluster0.tioxubx.mongodb.net/`,
 
   // JWT
   jwtSecret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
@@ -51,5 +52,12 @@ module.exports = {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 900000, // 15 minutes
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,
     contactMax: parseInt(process.env.CONTACT_RATE_LIMIT_MAX, 10) || 5
+  },
+
+  // Cloudinary
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || 'dzdhygptt',
+    apiKey: process.env.CLOUDINARY_API_KEY || '135615561516453',
+    apiSecret: process.env.CLOUDINARY_API_SECRET || 'CvNoNy1VzRTaGmjKmWj_2iWCUj8'
   }
 };
