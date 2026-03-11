@@ -56,7 +56,7 @@ export default function ContactClient({ form, info, contactInfo, expectations, s
     {
       icon: "📧",
       label: "Email Us",
-      value: getContactValue(contactInfo?.email, info?.email || "hello@growthvalley.com"),
+      value: getContactValue(contactInfo?.email || "hello@growthvalley.com"),
     },
     {
       icon: "📞",
