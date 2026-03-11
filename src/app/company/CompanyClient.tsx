@@ -313,26 +313,42 @@ export default function CompanyClient({ mission, origin, teamMembers, values, ap
             viewport={{ once: true, margin: "-50px" }}
           >
             {values?.items?.map((value, index) => (
+              // <motion.div
+              //   key={value.title || `value-${index}`}
+              //   className="bg-white dark:bg-brand-grey-900 p-6 border border-brand-grey-200 dark:border-brand-grey-800 relative overflow-hidden"
+              //   variants={itemVariants}
+              //   whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+              // >
+              //   {/* Number indicator */}
+              //   {/* <motion.span
+              //     className="text-display text-accent/10 absolute -top-2 right-2"
+              //     initial={{ opacity: 0, scale: 0.5 }}
+              //     whileInView={{ opacity: 1, scale: 1 }}
+              //     viewport={{ once: true }}
+              //     transition={{ delay: index * 0.1 }}
+              //   >
+              //     {String(index + 1).padStart(2, '0')}
+              //   </motion.span> */}
+              //   <h3 className="text-heading-4 text-brand-black dark:text-white mb-3 relative z-10">
+              //     {value.title}
+              //   </h3>
+              //   <p className="text-body text-brand-grey-500 dark:text-brand-grey-400 relative z-10 text-justify">
+              //     {value.description}
+              //   </p>              </motion.div>
+
               <motion.div
                 key={value.title || `value-${index}`}
-                className="bg-white dark:bg-brand-grey-900 p-6 border border-brand-grey-200 dark:border-brand-grey-800 relative overflow-hidden"
+                className="p-2"
                 variants={itemVariants}
-                whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                whileHover={{ y: -3 }}
               >
-                {/* Number indicator */}
-                <motion.span
-                  className="text-display text-accent/10 absolute -top-2 right-2"
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  {String(index + 1).padStart(2, '0')}
-                </motion.span>
-                <h3 className="text-heading-4 text-brand-black dark:text-white mb-3 relative z-10">
+                <h3 className="text-heading-4 text-brand-black dark:text-white mb-3">
                   {value.title}
                 </h3>
-                <p className="text-body text-brand-grey-500 dark:text-brand-grey-400 relative z-10">{value.description}</p>
+
+                <p className="text-body text-brand-grey-500 dark:text-brand-grey-400 text-left">
+                  {value.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -412,7 +428,7 @@ export default function CompanyClient({ mission, origin, teamMembers, values, ap
                               <h3 className="text-heading-4 text-brand-black dark:text-white mb-2">
                                 {step.title}
                               </h3>
-                              <p className="text-body text-brand-grey-500 dark:text-brand-grey-400">
+                              <p className="text-body text-left text-brand-grey-500 dark:text-brand-grey-400">
                                 {step.description}
                               </p>
                             </div>
@@ -421,8 +437,8 @@ export default function CompanyClient({ mission, origin, teamMembers, values, ap
                             {!isLastInRow && (
                               <motion.div
                                 className={`hidden lg:block absolute top-8 left-20 w-full h-0.5 ${isReversed
-                                    ? 'bg-gradient-to-l from-accent/30 to-transparent'
-                                    : 'bg-gradient-to-r from-accent/30 to-transparent'
+                                  ? 'bg-gradient-to-l from-accent/30 to-transparent'
+                                  : 'bg-gradient-to-r from-accent/30 to-transparent'
                                   }`}
                                 initial={{ scaleX: 0, originX: isReversed ? 1 : 0 }}
                                 whileInView={{ scaleX: 1 }}
