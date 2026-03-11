@@ -88,11 +88,7 @@ app.use(
 
 
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://growth-valley-testing.vercel.app",
-    /\.vercel\.app$/
-  ],
+  origin: true, // allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Accept', 'Origin'],
