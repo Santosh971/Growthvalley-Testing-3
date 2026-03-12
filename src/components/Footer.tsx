@@ -53,13 +53,14 @@ export default function Footer() {
                 <Image
                   src={footerLogo}
                   alt={siteName}
-                  width={128}
-                  height={32}
-                  className="h-8 w-auto"
+                  width={256}   // bigger than before
+                  height={64}   // bigger than before
+                  className="h-16 w-auto" // increases the visible height
                 />
               ) : (
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {siteName.split(' ')[0]}<span className="text-accent">{siteName.split(' ')[1] || ''}</span>
+                <span className="text-4xl font-semibold tracking-tight text-white dark:text-white">
+                  {siteName.split(' ')[0]}
+                  <span className="text-accent">{siteName.split(' ')[1] || ''}</span>
                 </span>
               )}
             </Link>
