@@ -77,8 +77,8 @@ const caseStudySchema = new mongoose.Schema({
   clientName: {
     type: String,
     trim: true,
-    required: false,       // <-- optional now
-    default: undefined     // <-- optional, no default
+    // required: false,       // <-- optional now
+    // default: undefined     // <-- optional, no default
   },
   clientLogo: {
     type: String,

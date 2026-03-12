@@ -139,21 +139,12 @@ const schemas = {
     contentBlocks: Joi.array().items(Joi.object({
       id: Joi.string(),
       type: Joi.string().valid('heading', 'paragraph', 'bulletList').required(),
-      level: Joi.number().valid(1, 2, 3).when('type', {
-        is: 'heading',
-        then: Joi.number().valid(1, 2, 3).required(),
-        otherwise: Joi.forbidden()
-      }),
-      text: Joi.string().when('type', {
-        is: Joi.string().valid('heading', 'paragraph'),
-        then: Joi.string().required(),
-        otherwise: Joi.forbidden()
-      }),
-      items: Joi.array().items(Joi.string()).when('type', {
-        is: 'bulletList',
-        then: Joi.array().items(Joi.string()).min(1).required(),
-        otherwise: Joi.forbidden()
-      })
+      // level is for heading blocks - optional, defaults to 2 in the model
+      level: Joi.number().valid(1, 2, 3).optional(),
+      // text is for heading and paragraph blocks
+      text: Joi.string().optional(),
+      // items is for bulletList blocks
+      items: Joi.array().items(Joi.string()).optional()
     })),
     category: Joi.string().valid('Strategy', 'Automation', 'Performance', 'Technology', 'Growth', 'General').required(),
     tags: Joi.array().items(Joi.string()),
@@ -179,21 +170,12 @@ const schemas = {
     contentBlocks: Joi.array().items(Joi.object({
       id: Joi.string(),
       type: Joi.string().valid('heading', 'paragraph', 'bulletList').required(),
-      level: Joi.number().valid(1, 2, 3).when('type', {
-        is: 'heading',
-        then: Joi.number().valid(1, 2, 3).required(),
-        otherwise: Joi.forbidden()
-      }),
-      text: Joi.string().when('type', {
-        is: Joi.string().valid('heading', 'paragraph'),
-        then: Joi.string().required(),
-        otherwise: Joi.forbidden()
-      }),
-      items: Joi.array().items(Joi.string()).when('type', {
-        is: 'bulletList',
-        then: Joi.array().items(Joi.string()).min(1).required(),
-        otherwise: Joi.forbidden()
-      })
+      // level is for heading blocks - optional, defaults to 2 in the model
+      level: Joi.number().valid(1, 2, 3).optional(),
+      // text is for heading and paragraph blocks
+      text: Joi.string().optional(),
+      // items is for bulletList blocks
+      items: Joi.array().items(Joi.string()).optional()
     })),
     category: Joi.string().valid('Strategy', 'Automation', 'Performance', 'Technology', 'Growth', 'General'),
     tags: Joi.array().items(Joi.string()),

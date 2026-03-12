@@ -211,6 +211,7 @@ module.exports = {
   calculateReadTime,
   formatDate,
   formatRelativeTime,
+  generateExcerpt,
   parsePagination,
   buildSearchFilter,
   generateCSV,
