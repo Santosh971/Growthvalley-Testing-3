@@ -406,8 +406,16 @@ export function AnimatedIndustriesSection({ industries }: { industries: any }) {
                 href={`/industries#${industry.id || industry.name?.toLowerCase().replace(/\s+/g, '-')}`}
                 className="block h-full bg-white dark:bg-brand-grey-900 border border-brand-grey-200 dark:border-brand-grey-800 p-6 hover:border-accent hover:shadow-lg transition-all duration-300"
               >
-                <span className="text-3xl mb-4 block">
-                  {industry.icon}
+                <span className="text-3xl mb-4 block w-12 h-12 flex items-center justify-center">
+                  {industry.icon && (industry.icon.startsWith('http') || industry.icon.startsWith('/') || industry.icon.startsWith('data:')) ? (
+                    <img
+                      src={getImageUrl(industry.icon)}
+                      alt={industry.name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    industry.icon
+                  )}
                 </span>
                 <h3 className="text-heading-4 text-brand-black dark:text-white mb-2">
                   {industry.name}
@@ -808,11 +816,17 @@ export function AnimatedClientLogosSection({ clients }: { clients: any[] }) {
 
 // Case Study Preview Section - Auto-playing Carousel
 export function AnimatedCaseStudyPreview({ caseStudyPreview }: { caseStudyPreview: any }) {
+  const visibleCaseStudies = caseStudyPreview?.items || [];
+
+  if (visibleCaseStudies.length === 0) {
+    console.log("No case studies to display, skipping section.");
+    return null;
+  }
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Get visible case studies
-  const visibleCaseStudies = caseStudyPreview?.items || [];
+  // const visibleCaseStudies = caseStudyPreview?.items || [];
 
   // Calculate cards per view based on screen size
   const getCardsPerView = useCallback(() => {
@@ -920,34 +934,6 @@ export function AnimatedCaseStudyPreview({ caseStudyPreview }: { caseStudyPrevie
               }}
             >
               {visibleCaseStudies.map((cs: any, index: number) => (
-                // <div
-                //   key={index}
-                //   className="flex-shrink-0 px-4"
-                //   style={{ width: `${100 / cardsPerView}%` }}
-                // >
-                //   <Link
-                //     href={cs.link || '/case-studies'}
-                //     className="block h-full bg-white dark:bg-brand-grey-900 border border-brand-grey-200 dark:border-brand-grey-800 p-4 sm:p-6 md:p-8 hover:border-accent hover:shadow-xl transition-all duration-300 rounded-lg min-h-[200px]"
-                //   >
-                //     {/* Category label and result */}
-                //     <div className="flex justify-between items-start mb-3 sm:mb-4">
-                //       <span className="text-xs sm:text-sm md:text-base text-brand-grey-400 dark:text-brand-grey-500 uppercase">
-                //         {cs.industry}
-                //       </span>
-                //       <span className="text-base sm:text-xs md:text-xl lg:text-2xl xl:text-3xl text-accent font-bold">
-                //         {cs.result}
-                //       </span>
-                //     </div>
-                //     {/* Bold white title */}
-                //     <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-brand-black dark:text-white mb-1 sm:mb-2">
-                //       {cs.client}
-                //     </h3>
-                //     {/* Grey description */}
-                //     <p className="text-sm sm:text-base md:text-lg text-brand-grey-500 dark:text-brand-grey-400">
-                //       {cs.description}
-                //     </p>
-                //   </Link>
-                // </div>
 
                 <div
                   key={index}

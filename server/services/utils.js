@@ -21,18 +21,18 @@ const generateUniqueSlug = async (baseSlug, checkExists) => {
   let slug = generateSlug(baseSlug);
   let counter = 1;
   let uniqueSlug = slug;
-  
+
   while (await checkExists(uniqueSlug)) {
     uniqueSlug = `${slug}-${counter}`;
     counter++;
-    
+
     // Safety limit
     if (counter > 1000) {
       uniqueSlug = `${slug}-${Date.now()}`;
       break;
     }
   }
-  
+
   return uniqueSlug;
 };
 
@@ -67,16 +67,16 @@ const calculateReadTime = (content, wordsPerMinute = 200) => {
  */
 const formatDate = (date, format = 'long') => {
   if (!date) return '';
-  
+
   const d = new Date(date);
-  
+
   if (format === 'short') {
     return d.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric'
     });
   }
-  
+
   if (format === 'long') {
     return d.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -84,11 +84,11 @@ const formatDate = (date, format = 'long') => {
       day: 'numeric'
     });
   }
-  
+
   if (format === 'iso') {
     return d.toISOString().split('T')[0];
   }
-  
+
   return d.toString();
 };
 
@@ -97,7 +97,7 @@ const formatDate = (date, format = 'long') => {
  */
 const formatRelativeTime = (date) => {
   if (!date) return '';
-  
+
   const now = new Date();
   const past = new Date(date);
   const diffMs = now - past;
@@ -105,12 +105,12 @@ const formatRelativeTime = (date) => {
   const diffMins = Math.floor(diffSecs / 60);
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
-  
+
   if (diffSecs < 60) return 'just now';
   if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
   if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  
+
   return formatDate(date, 'short');
 };
 
@@ -133,7 +133,7 @@ const parsePagination = (query, defaults = {}) => {
     defaults.maxLimit || 100
   );
   const skip = (page - 1) * limit;
-  
+
   return {
     page,
     limit,
@@ -149,7 +149,7 @@ const parsePagination = (query, defaults = {}) => {
  */
 const buildSearchFilter = (search, fields) => {
   if (!search || !fields.length) return {};
-  
+
   return {
     $or: fields.map(field => ({
       [field]: { $regex: search, $options: 'i' }
@@ -162,10 +162,10 @@ const buildSearchFilter = (search, fields) => {
  */
 const generateCSV = (data, fields) => {
   if (!data.length) return '';
-  
+
   // Header row
   const header = fields.map(f => `"${f.label}"`).join(',');
-  
+
   // Data rows
   const rows = data.map(item => {
     return fields.map(f => {
@@ -175,7 +175,7 @@ const generateCSV = (data, fields) => {
       return `"${String(value).replace(/"/g, '""')}"`;
     }).join(',');
   });
-  
+
   return [header, ...rows].join('\n');
 };
 
@@ -211,7 +211,6 @@ module.exports = {
   calculateReadTime,
   formatDate,
   formatRelativeTime,
-  generateExcerpt,
   parsePagination,
   buildSearchFilter,
   generateCSV,

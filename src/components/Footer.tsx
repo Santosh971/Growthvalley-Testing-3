@@ -26,12 +26,20 @@ const footerLinks = {
   ],
 };
 
+interface SocialLinks {
+  linkedin?: string;
+  twitter?: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+}
 export default function Footer() {
   const { settings } = useSettings();
   const { logo: footerLogo, hasLogo, siteName } = useLogo();
   const currentYear = new Date().getFullYear();
 
-  const socialLinks = settings?.socialLinks || {};
+  // const socialLinks = settings?.socialLinks || {};
+  const socialLinks: SocialLinks = settings?.socialLinks || {};
   const copyrightText = settings?.footer?.copyrightText || `© ${currentYear} ${siteName}. All rights reserved.`;
 
   return (

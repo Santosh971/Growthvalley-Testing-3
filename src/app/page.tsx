@@ -149,15 +149,15 @@ export default async function Home() {
   const cta = getSection(content, 'cta');
 
   // Merge CMS content with dynamic case studies
-  // Use featured case studies from database if available, otherwise fall back to CMS content
+  // Only show case studies from backend/database - do NOT fall back to static CMS content
+  // If no backend case studies exist, the section will be hidden (returns null in component)
   const caseStudyPreview = {
     title: caseStudyPreviewContent?.title || 'Results',
     subtitle: caseStudyPreviewContent?.subtitle || 'Real transformations. Real numbers.',
-    items: featuredCaseStudies.length > 0
-      ? featuredCaseStudies
-      : (caseStudyPreviewContent?.items || [])
+    items: featuredCaseStudies.length > 0 ? featuredCaseStudies : []
   };
 
+  console.log("CaseStudy Preview : ", caseStudyPreview);
   return (
     <>
       <AnimatedHeroSection hero={hero} />
@@ -173,3 +173,5 @@ export default async function Home() {
     </>
   );
 }
+
+

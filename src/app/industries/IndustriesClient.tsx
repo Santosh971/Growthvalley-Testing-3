@@ -3,6 +3,7 @@
 import Container from "@/components/Container";
 import Button from "@/components/Button";
 import { motion } from "framer-motion";
+import { getImageUrl } from "@/lib/utils";
 
 /**
  * Safely converts a value to an array.
@@ -21,6 +22,33 @@ function ensureArray(value: unknown): string[] {
     }
   }
   return [];
+}
+
+/**
+ * Checks if a string is a URL (for icons)
+ */
+function isIconUrl(icon: string): boolean {
+  return icon.startsWith('http') || icon.startsWith('/') || icon.startsWith('data:');
+}
+
+/**
+ * Renders an icon - either as an image (if URL) or as text (if emoji)
+ */
+function renderIcon(icon: string, className: string = "") {
+  if (!icon) return null;
+
+  if (isIconUrl(icon)) {
+    return (
+      <img
+        src={getImageUrl(icon)}
+        alt="Industry icon"
+        className={className}
+        style={{ objectFit: 'contain' }}
+      />
+    );
+  }
+
+  return <span className={className}>{icon}</span>;
 }
 
 interface Industry {
@@ -87,13 +115,21 @@ export default function IndustriesClient({ hero, industries, cta }: IndustriesCl
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 }}
                   >
-                    <motion.span
-                      className="text-5xl"
+                    <motion.div
+                      className="text-5xl w-12 h-12 flex items-center justify-center"
                       whileHover={{ scale: 1.2, rotate: 10 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      {industry.icon}
-                    </motion.span>
+                      {isIconUrl(industry.icon) ? (
+                        <img
+                          src={getImageUrl(industry.icon)}
+                          alt={industry.name}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <span>{industry.icon}</span>
+                      )}
+                    </motion.div>
                     <h2 className="text-heading-2 text-brand-black dark:text-white">
                       {industry.name}
                     </h2>

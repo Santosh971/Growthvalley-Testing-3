@@ -71,12 +71,14 @@ const caseStudySchema = new mongoose.Schema({
   industry: {
     type: String,
     enum: ['SaaS', 'E-commerce', 'Healthcare', 'Finance', 'Education', 'Manufacturing', 'Real Estate', 'Technology', 'Other'],
-    default: 'Other'
+    required: false,       // <-- optional now
+    default: undefined     // <-- optional, no default
   },
   clientName: {
     type: String,
     trim: true,
-    default: ''
+    required: false,       // <-- optional now
+    default: undefined     // <-- optional, no default
   },
   clientLogo: {
     type: String,
@@ -137,20 +139,20 @@ caseStudySchema.index({ featured: 1 });
 caseStudySchema.index({ createdAt: -1 });
 
 // Transform output
-caseStudySchema.methods.toJSON = function() {
+caseStudySchema.methods.toJSON = function () {
   const caseStudy = this.toObject();
   delete caseStudy.__v;
   return caseStudy;
 };
 
 // Static to find published case studies
-caseStudySchema.statics.findPublished = function() {
+caseStudySchema.statics.findPublished = function () {
   return this.find({ status: 'published', publishDate: { $lte: new Date() } })
     .sort({ publishDate: -1 });
 };
 
 // Static to find featured case studies
-caseStudySchema.statics.findFeatured = function() {
+caseStudySchema.statics.findFeatured = function () {
   return this.find({ status: 'published', featured: true })
     .sort({ publishDate: -1 });
 };

@@ -55,14 +55,20 @@ const defaultContent = {
         { icon: '🏦', name: 'Financial Services', description: 'Driving revenue excellence in regulated environments.' }
       ]
     },
+    // caseStudyPreview: {
+    //   title: 'Results',
+    //   subtitle: 'Real transformations. Real numbers.',
+    //   items: [
+    //     { client: 'TechScale', industry: 'SaaS', result: '40% revenue growth', description: 'Transformed revenue operations for a fast-growing SaaS company.', link: '/case-studies/saas-revenue-transformation' },
+    //     { client: 'GlobalTech', industry: 'Manufacturing', result: '60% new market revenue', description: 'Redesigned go-to-market strategy for a legacy manufacturer.', link: '/case-studies/manufacturing-demand-generation' }
+    //   ]
+    // },
     caseStudyPreview: {
-      title: 'Results',
-      subtitle: 'Real transformations. Real numbers.',
-      items: [
-        { client: 'TechScale', industry: 'SaaS', result: '40% revenue growth', description: 'Transformed revenue operations for a fast-growing SaaS company.', link: '/case-studies/saas-revenue-transformation' },
-        { client: 'GlobalTech', industry: 'Manufacturing', result: '60% new market revenue', description: 'Redesigned go-to-market strategy for a legacy manufacturer.', link: '/case-studies/manufacturing-demand-generation' }
-      ]
+      title: '',
+      subtitle: '',
+      items: []
     },
+
     process: {
       title: 'How We Work',
       subtitle: 'A systematic approach to transformation',

@@ -54,6 +54,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function IndustriesPage() {
   const content = await getPageContent('industries');
+
+  // Debug: Log what we receive from the API
+  console.log('Industries page - content.sections:', JSON.stringify(content.sections, null, 2));
+  console.log('Industries page - isDefault:', content.isDefault);
+
   const hero = getSection<{ title: string; description: string }>(content, 'hero');
   const industriesRaw = getSection<Array<{
     id: string;
@@ -65,6 +70,10 @@ export default async function IndustriesPage() {
     caseStudyCount: number;
   }>>(content, 'industries');
   const cta = getSection<{ title: string; description: string; buttonText: string; buttonLink: string }>(content, 'cta');
+
+  // Debug: Log the industries array
+  console.log('Industries page - industriesRaw:', industriesRaw);
+  console.log('Industries page - industriesRaw is array:', Array.isArray(industriesRaw));
 
   // Ensure industries is always an array
   const industries = Array.isArray(industriesRaw) ? industriesRaw : [];
