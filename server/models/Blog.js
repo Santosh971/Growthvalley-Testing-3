@@ -125,7 +125,7 @@ const blogSchema = new mongoose.Schema({
 });
 
 // Indexes
-blogSchema.index({ slug: 1 });
+// Note: 'slug' index is already created by unique: true in schema definition
 blogSchema.index({ status: 1, publishDate: -1 });
 blogSchema.index({ category: 1 });
 blogSchema.index({ tags: 1 });

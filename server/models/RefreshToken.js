@@ -5,8 +5,8 @@ const refreshTokenSchema = new mongoose.Schema({
   token: {
     type: String,
     required: true,
-    unique: true,
-    index: true
+    unique: true
+    // Note: unique: true already creates an index, no need for index: true
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,

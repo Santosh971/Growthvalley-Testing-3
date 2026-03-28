@@ -132,7 +132,7 @@ const caseStudySchema = new mongoose.Schema({
 });
 
 // Indexes
-caseStudySchema.index({ slug: 1 });
+// Note: 'slug' index is already created by unique: true in schema definition
 caseStudySchema.index({ status: 1, publishDate: -1 });
 caseStudySchema.index({ industry: 1 });
 caseStudySchema.index({ featured: 1 });

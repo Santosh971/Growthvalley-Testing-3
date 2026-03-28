@@ -44,7 +44,7 @@ const adminSchema = new mongoose.Schema({
 });
 
 // Indexes
-adminSchema.index({ email: 1 });
+// Note: 'email' index is already created by unique: true in schema definition
 adminSchema.index({ resetPasswordToken: 1 });
 
 // Hash password before saving
