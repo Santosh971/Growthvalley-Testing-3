@@ -12,7 +12,9 @@ const nextConfig = {
   // Enable gzip compression
   compress: true,
 
-
+  // ✅ CRITICAL: Enable standalone output for self-hosted deployment (cPanel)
+  // This creates a self-contained build that works without Vercel
+  output: 'standalone',
 
   images: {
     // Allow images from any external source and any format
@@ -30,6 +32,15 @@ const nextConfig = {
     // Optimize package imports to reduce bundle size
     optimizePackageImports: ['framer-motion', 'react-icons'],
   },
+
+  // ✅ Generate ETags for better caching validation
+  generateEtags: true,
+
+  // ✅ Power by header removal for security
+  poweredByHeader: false,
+
+  // ✅ Strict mode for better React behavior
+  reactStrictMode: true,
 };
 
 export default nextConfig;

@@ -43,3 +43,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logs (keep directory structure)
+logs/*
+!logs/.gitkeep
+
+# deployment artifacts
+*.tgz

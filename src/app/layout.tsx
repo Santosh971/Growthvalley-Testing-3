@@ -80,6 +80,55 @@ export default async function RootLayout({
             `,
           }}
         />
+        {/* Chunk loading error handler - auto-reload on chunk failures */}
+        <Script
+          id="chunk-error-handler"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var hasReloaded = false;
+                window.addEventListener('error', function(event) {
+                  if (event.message && (
+                    event.message.includes('Loading chunk') ||
+                    event.message.includes('ChunkLoadError') ||
+                    (event.filename && event.filename.includes('_next/static/chunks'))
+                  )) {
+                    console.error('[Chunk Error]', event.message);
+                    if (!hasReloaded) {
+                      hasReloaded = true;
+                      var reloadCount = parseInt(sessionStorage.getItem('chunk-reload-count') || '0');
+                      if (reloadCount < 3) {
+                        sessionStorage.setItem('chunk-reload-count', String(reloadCount + 1));
+                        window.location.reload();
+                      }
+                    }
+                  }
+                });
+                window.addEventListener('unhandledrejection', function(event) {
+                  var msg = String(event.reason);
+                  if (msg.includes('ChunkLoadError') || msg.includes('Loading chunk')) {
+                    console.error('[Chunk Promise Error]', msg);
+                    if (!hasReloaded) {
+                      hasReloaded = true;
+                      var reloadCount = parseInt(sessionStorage.getItem('chunk-reload-count') || '0');
+                      if (reloadCount < 3) {
+                        sessionStorage.setItem('chunk-reload-count', String(reloadCount + 1));
+                        window.location.reload();
+                      }
+                    }
+                  }
+                });
+                window.addEventListener('load', function() {
+                  setTimeout(function() {
+                    sessionStorage.removeItem('chunk-reload-count');
+                    hasReloaded = false;
+                  }, 1000);
+                });
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-white dark:bg-brand-grey-950 text-brand-black dark:text-white">
         <ThemeProvider>
