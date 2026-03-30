@@ -26,6 +26,42 @@ app.set('trust proxy', 1);
 
 
 
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+
+//         styleSrc: ["'self'", "'unsafe-inline'"],
+//         scriptSrc: ["'self'"],
+
+//         // Allow Cloudinary URLs for images
+//         imgSrc: [
+//           "'self'",
+//           "data:",
+//           "https:",
+//           "http://localhost:3001",
+//           "https://res.cloudinary.com"
+//         ],
+
+//         connectSrc: [
+//           "'self'",
+//           "http://localhost:3001",
+//           "https://res.cloudinary.com",
+//           "https://growthvalley-testing-3.onrender.com"
+//         ],
+
+//         fontSrc: ["'self'"],
+//         objectSrc: ["'none'"],
+//         mediaSrc: ["'self'"],
+//         frameSrc: ["'none'"],
+//       },
+//     },
+
+//     crossOriginEmbedderPolicy: false,
+//   })
+// );
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -33,12 +69,12 @@ app.use(
         defaultSrc: ["'self'"],
 
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
 
-        // Allow Cloudinary URLs for images
         imgSrc: [
           "'self'",
           "data:",
+          "blob:",
           "https:",
           "http://localhost:3001",
           "https://res.cloudinary.com"
@@ -47,41 +83,53 @@ app.use(
         connectSrc: [
           "'self'",
           "http://localhost:3001",
+          "http://localhost:5173",
+          "https://res.cloudinary.com",
+          "https://growthvalley-testing-3.onrender.com"
+        ],
+
+        fontSrc: ["'self'", "data:"],
+
+        objectSrc: ["'none'"],
+
+        mediaSrc: [
+          "'self'",
           "https://res.cloudinary.com"
         ],
 
-        fontSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
+        frameSrc: ["'self'"],
+
+        // ✅ VERY IMPORTANT (fixes many Next.js issues)
+        upgradeInsecureRequests: [],
       },
     },
 
     crossOriginEmbedderPolicy: false,
+
+    // ✅ CRITICAL FIX (for your error)
+    crossOriginResourcePolicy: false,
   })
 );
 
-
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://growthvalley-testing-3-o9caw072p-santosh971s-projects.vercel.app"
+  "http://localhost:5173",
+  "https://growthvalley-testing-3.vercel.app"
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+        callback(null, true);
       } else {
-        return callback(new Error("Not allowed by CORS"));
+        console.log("Blocked by CORS:", origin);
+        callback(null, false); // 👈 DON'T throw error
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 // ✅ VERY IMPORTANT (fixes preflight issue)
@@ -100,14 +148,19 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static files for uploads
 // app.use('/uploads', express.static(path.join(__dirname, config.upload.dir)));
+// app.use(
+//   "/uploads",
+//   express.static(path.join(process.cwd(), "uploads"), {
+//     setHeaders: (res) => {
+//       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+//     },
+//   })
+// );
 app.use(
   "/uploads",
-  express.static(path.join(process.cwd(), "uploads"), {
-    setHeaders: (res) => {
-      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-    },
-  })
+  express.static(path.join(process.cwd(), "uploads"))
 );
+
 // Apply rate limiting to all routes
 app.use('/api', apiLimiter);
 
