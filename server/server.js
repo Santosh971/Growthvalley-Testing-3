@@ -24,23 +24,7 @@ connectDB();
 // Trust proxy (for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
 
-// Security middleware
-// app.use(helmet({
-//   contentSecurityPolicy: {
-//     directives: {
-//       defaultSrc: ["'self'"],
-//       styleSrc: ["'self'", "'unsafe-inline'"],
-//       scriptSrc: ["'self'"],
-//       imgSrc: ["'self'", 'data:', 'https:'],
-//       connectSrc: ["'self'"],
-//       fontSrc: ["'self'"],
-//       objectSrc: ["'none'"],
-//       mediaSrc: ["'self'"],
-//       frameSrc: ["'none'"],
-//     },
-//   },
-//   crossOriginEmbedderPolicy: false,
-// }));
+
 
 app.use(
   helmet({
@@ -76,25 +60,39 @@ app.use(
     crossOriginEmbedderPolicy: false,
   })
 );
-// CORS configuration
+
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://growthvalley-testing-3-o9caw072p-santosh971s-projects.vercel.app"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+// ✅ VERY IMPORTANT (fixes preflight issue)
+app.options("*", cors());
+
 // app.use(cors({
-//   origin: config.nodeEnv === 'production'
-//     ? [config.frontendUrl, /\.growthvalley\.(in|com)$/]
-//     : true,
-//   // : config.frontendUrl,
+//   origin: true, // allow all origins
 //   credentials: true,
 //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 //   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Accept', 'Origin'],
 // }));
-
-
-
-app.use(cors({
-  origin: true, // allow all origins
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Accept', 'Origin'],
-}));
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
