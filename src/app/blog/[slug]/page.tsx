@@ -5,8 +5,6 @@ import { notFound } from "next/navigation";
 import { getImageUrl } from "@/lib/utils";
 import { getApiUrl } from "@/lib/api-config";
 
-const API_URL = getApiUrl() || '';
-
 // Content block types
 interface ContentBlock {
   id: string;
@@ -102,12 +100,13 @@ interface Props {
 }
 
 async function getBlog(slug: string) {
-  if (!API_URL) {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
     console.error('API URL not configured');
     return null;
   }
   try {
-    const url = `${API_URL}/api/blog/${slug}`;
+    const url = `${apiUrl}/api/blog/${slug}`;
     console.log("Fetching blog from:", url);
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
@@ -124,10 +123,11 @@ async function getBlog(slug: string) {
 }
 
 async function getRelatedBlogs(currentSlug: string, category: string) {
-  if (!API_URL) return [];
+  const apiUrl = getApiUrl();
+  if (!apiUrl) return [];
   try {
     const res = await fetch(
-      `${API_URL}/api/blog`,
+      `${apiUrl}/api/blog`,
       { cache: "no-store" }
     );
     if (!res.ok) return [];
@@ -178,9 +178,10 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  if (!API_URL) return [];
+  const apiUrl = getApiUrl();
+  if (!apiUrl) return [];
   try {
-    const res = await fetch(`${API_URL}/api/blog`);
+    const res = await fetch(`${apiUrl}/api/blog`);
     if (!res.ok) return [];
     const data = await res.json();
     return (data.data || []).map((post: any) => ({

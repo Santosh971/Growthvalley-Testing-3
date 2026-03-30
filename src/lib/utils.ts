@@ -1,9 +1,4 @@
-
-import { getApiUrl } from './api-config';
-
-// Legacy export for backward compatibility
-const API_URL = getApiUrl() || '';
-
+import { getApiUrl, getMediaUrl } from './api-config';
 
 // Utility function to generate slugs
 export function slugify(text: string): string {
@@ -28,9 +23,8 @@ export function truncate(text: string, length: number): string {
   if (text.length <= length) return text;
   return text.slice(0, length).trim() + '...';
 }
-// Get full URL for images/media
-import { getMediaUrl } from './api-config';
 
+// Get full URL for images/media
 export const getImageUrl = (path?: string) => {
   return getMediaUrl(path);
 };
@@ -46,8 +40,7 @@ export async function fetchAPI(endpoint: string) {
   return res.json();
 }
 
-// lib/publicApi.ts
-
+// Fetch page content from API
 export async function getPageContent(page: string) {
   const apiUrl = getApiUrl();
   if (!apiUrl) {
@@ -68,7 +61,7 @@ export async function getPageContent(page: string) {
 }
 
 // Fetch case studies from backend
-async function getCaseStudies() {
+export async function getCaseStudies() {
   const apiUrl = getApiUrl();
   if (!apiUrl) {
     console.error('API URL not configured');

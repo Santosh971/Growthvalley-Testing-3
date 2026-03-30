@@ -1,5 +1,6 @@
 import { getPageContent, getSection } from "@/lib/content";
 import dynamicComponent from "next/dynamic";
+import { getApiUrl } from '@/lib/api-config';
 
 // Route segment config - disable static generation for dynamic content
 export const dynamic = 'force-dynamic';
@@ -56,15 +57,12 @@ const AnimatedFinalCTA = dynamicComponent(
   { ssr: false }
 );
 
-import { getApiUrl } from '@/lib/api-config';
-
-const API_URL = getApiUrl() || '';
-
 // Fetch testimonials from API
 async function getTestimonials() {
-  if (!API_URL) return [];
+  const apiUrl = getApiUrl();
+  if (!apiUrl) return [];
   try {
-    const res = await fetch(`${API_URL}/api/testimonials?status=active`, {
+    const res = await fetch(`${apiUrl}/api/testimonials?status=active`, {
       cache: 'no-store'
     });
     const data = await res.json();
@@ -76,9 +74,10 @@ async function getTestimonials() {
 
 // Fetch clients from API
 async function getClients() {
-  if (!API_URL) return [];
+  const apiUrl = getApiUrl();
+  if (!apiUrl) return [];
   try {
-    const res = await fetch(`${API_URL}/api/clients?status=active`, {
+    const res = await fetch(`${apiUrl}/api/clients?status=active`, {
       cache: 'no-store'
     });
     const data = await res.json();
@@ -90,10 +89,11 @@ async function getClients() {
 
 // Fetch featured case studies from API and transform for home page
 async function getFeaturedCaseStudies() {
-  if (!API_URL) return [];
+  const apiUrl = getApiUrl();
+  if (!apiUrl) return [];
   try {
     // First try to get featured case studies
-    const featuredRes = await fetch(`${API_URL}/api/case-studies/featured?limit=6`, {
+    const featuredRes = await fetch(`${apiUrl}/api/case-studies/featured?limit=6`, {
       cache: 'no-store'
     });
     const featuredData = await featuredRes.json();
@@ -110,7 +110,7 @@ async function getFeaturedCaseStudies() {
     }
 
     // If no featured case studies, fetch all published case studies
-    const allRes = await fetch(`${API_URL}/api/case-studies?limit=6`, {
+    const allRes = await fetch(`${apiUrl}/api/case-studies?limit=6`, {
       cache: 'no-store'
     });
     const allData = await allRes.json();
@@ -134,9 +134,10 @@ async function getFeaturedCaseStudies() {
 
 // Fetch industries data from dedicated industries page content
 async function getIndustries() {
-  if (!API_URL) return null;
+  const apiUrl = getApiUrl();
+  if (!apiUrl) return null;
   try {
-    const res = await fetch(`${API_URL}/api/content/industries`, {
+    const res = await fetch(`${apiUrl}/api/content/industries`, {
       cache: 'no-store'
     });
     const data = await res.json();

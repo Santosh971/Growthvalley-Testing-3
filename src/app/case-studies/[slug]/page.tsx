@@ -4,19 +4,18 @@ import PageHeader from "@/components/PageHeader";
 import Button from "@/components/Button";
 import { getApiUrl } from "@/lib/api-config";
 
-const API_URL = getApiUrl() || '';
-
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 async function getCaseStudy(slug: string) {
-  if (!API_URL) {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
     console.error('API URL not configured');
     return null;
   }
   try {
-    const url = `${API_URL}/api/case-studies/${slug}`;
+    const url = `${apiUrl}/api/case-studies/${slug}`;
     console.log("Fetching case study from:", url);
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {

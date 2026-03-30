@@ -9,7 +9,7 @@
 
 /**
  * Get the API URL with safe fallback handling
- * @returns The API URL or null if not configured in production
+ * @returns The API URL (throws in production if not configured)
  */
 export function getApiUrl(): string | null {
   const envUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
@@ -18,15 +18,24 @@ export function getApiUrl(): string | null {
     return envUrl;
   }
 
-  // Only allow localhost fallback in development mode
-  if (process.env.NODE_ENV === 'development') {
+  // Check if we're on Vercel/production
+  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+  const nodeEnv = process.env.NODE_ENV;
+
+  // In development, allow localhost fallback
+  if (nodeEnv === 'development' && !isVercel) {
     return 'http://localhost:3001';
   }
 
-  // Production without configured URL - log error and return null
+  // Production without configured URL - this is a configuration error
   console.error(
-    'CRITICAL: API URL not configured. Set NEXT_PUBLIC_API_URL environment variable.'
+    '❌ CRITICAL: NEXT_PUBLIC_API_URL environment variable is not configured!',
+    '\n   Set it to your backend API URL (e.g., https://growthvalley-testing-3.onrender.com)',
+    '\n   Environment:', nodeEnv,
+    '\n   VERCEL:', isVercel
   );
+
+  // Return null - calling code should handle this gracefully
   return null;
 }
 

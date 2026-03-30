@@ -2,8 +2,6 @@
 // This file runs on the server only and provides fresh settings
 import { getApiUrl } from './api-config';
 
-const API_URL = getApiUrl() || '';
-
 // Default settings (duplicated to avoid circular dependency)
 const defaultSettings = {
   siteName: 'Growth Valley',
@@ -76,9 +74,20 @@ function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T> 
  * This should only be called from server components
  */
 export async function getSettings(): Promise<typeof defaultSettings> {
+  // Get API URL - returns null if not configured
+  const apiUrl = getApiUrl();
+
+  if (!apiUrl) {
+    console.warn('⚠️ API URL not configured - returning default settings. Set NEXT_PUBLIC_API_URL environment variable.');
+    return defaultSettings;
+  }
+
   try {
-    const response = await fetch(`${API_URL}/api/settings`, {
+    const response = await fetch(`${apiUrl}/api/settings`, {
       cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (response.ok) {
@@ -87,6 +96,8 @@ export async function getSettings(): Promise<typeof defaultSettings> {
       if (result.success && result.data) {
         return deepMerge(defaultSettings, result.data);
       }
+    } else {
+      console.error(`Failed to fetch settings: ${response.status} ${response.statusText}`);
     }
   } catch (error) {
     console.error('Failed to fetch settings:', error);

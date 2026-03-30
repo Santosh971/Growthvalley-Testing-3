@@ -1,7 +1,14 @@
 // Admin API utility functions
 import { getApiUrl } from './api-config';
 
-const API_URL = getApiUrl() || '';
+// Lazy getter for API URL - evaluates at runtime, not module load time
+const getApiUrlOrThrow = (): string => {
+  const url = getApiUrl();
+  if (!url) {
+    throw new Error('API URL not configured. Set NEXT_PUBLIC_API_URL environment variable.');
+  }
+  return url;
+};
 
 // Token management
 export const getToken = () => {
@@ -58,7 +65,8 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   try {
-    const response = await fetch(`${API_URL}/api/admin/refresh-token`, {
+    const apiUrl = getApiUrlOrThrow();
+    const response = await fetch(`${apiUrl}/api/admin/refresh-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -123,7 +131,7 @@ async function apiRequest(
   options: RequestInit & { isFormData?: boolean } = {},
   retry = true
 ): Promise<any> {
-
+  const apiUrl = getApiUrlOrThrow();
   const token = getToken();
 
   const headers: HeadersInit = {
@@ -136,7 +144,7 @@ async function apiRequest(
     headers['Content-Type'] = 'application/json';
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(`${apiUrl}${endpoint}`, {
     ...options,
     headers,
   });
@@ -324,12 +332,13 @@ export const mediaAPI = {
   },
 
   upload: async (file: File, folder = 'general') => {
+    const apiUrl = getApiUrlOrThrow();
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', folder);
 
     const token = getToken();
-    const response = await fetch(`${API_URL}/api/media`, {
+    const response = await fetch(`${apiUrl}/api/media`, {
       method: 'POST',
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
