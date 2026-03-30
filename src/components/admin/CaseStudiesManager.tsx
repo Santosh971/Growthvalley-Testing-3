@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { caseStudyAPI } from '@/lib/admin-api';
+import { getApiUrl } from '@/lib/api-config';
 
 interface CaseStudy {
   _id: string;
@@ -62,9 +63,15 @@ export default function CaseStudiesManager() {
   };
 
   const handleEdit = async (id: string) => {
+    const apiUrl = getApiUrl();
+    if (!apiUrl) {
+      setError('API URL not configured');
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/case-studies/admin/${id}`, {
+      const response = await fetch(`${apiUrl}/api/case-studies/admin/${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json',

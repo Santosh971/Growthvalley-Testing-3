@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getApiUrl, getMediaUrl } from './api-config';
 
 interface SocialLinks {
   linkedin: string;
@@ -143,9 +144,17 @@ export function SettingsProvider({ children, initialSettings }: SettingsProvider
   const [loading, setLoading] = useState(!initialSettings);
 
   const fetchSettings = async () => {
+    const apiUrl = getApiUrl();
+    if (!apiUrl) {
+      console.error('API URL not configured for settings fetch');
+      setSettings(defaultSettings);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/settings`,
+        `${apiUrl}/api/settings`,
         { cache: 'no-store' }
       );
 
@@ -216,10 +225,7 @@ export function useLogo() {
 
   // Helper to get full URL for logo
   const getLogoUrl = (path: string | undefined): string => {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    return `${apiUrl}${path}`;
+    return getMediaUrl(path);
   };
 
   const logoLight = getLogoUrl(settings?.businessInfo?.logo);

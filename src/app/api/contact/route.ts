@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getApiUrl } from "@/lib/api-config";
 
-// API URL - use NEXT_PUBLIC_API_URL for consistency
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:3001";
+// API URL configuration
 
 // Validation helpers
 const validators = {
@@ -105,6 +105,14 @@ function validateContactForm(data: Record<string, unknown>): string[] {
 }
 
 export async function POST(request: NextRequest) {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    return NextResponse.json(
+      { message: "Server configuration error. Please try again later." },
+      { status: 500 }
+    );
+  }
+
   try {
     // Parse request body
     let body: Record<string, unknown>;
@@ -138,10 +146,10 @@ export async function POST(request: NextRequest) {
     };
 
     // Forward to backend API
-    const apiUrl = `${API_URL}/api/contact`;
-    console.log("Forwarding contact form to:", apiUrl);
+    const backendUrl = `${apiUrl}/api/contact`;
+    console.log("Forwarding contact form to:", backendUrl);
 
-    const response = await fetch(apiUrl, {
+    const response = await fetch(backendUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

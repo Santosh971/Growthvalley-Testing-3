@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useSettings } from '@/lib/settings-context';
+import { getMediaUrl } from '@/lib/api-config';
 
 /**
  * DynamicFavicon component
@@ -24,10 +25,9 @@ export default function DynamicFavicon() {
     // If no favicon in settings, don't change anything (keep existing)
     if (!faviconUrl) return;
 
-    // Get full URL if it's a relative path
-    const fullUrl = faviconUrl.startsWith('http')
-      ? faviconUrl
-      : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${faviconUrl}`;
+    // Get full URL using the safe helper
+    const fullUrl = getMediaUrl(faviconUrl);
+    if (!fullUrl) return;
 
     // Skip if same URL already applied (prevents unnecessary DOM updates)
     if (lastAppliedUrl.current === fullUrl) return;

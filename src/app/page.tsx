@@ -56,10 +56,13 @@ const AnimatedFinalCTA = dynamicComponent(
   { ssr: false }
 );
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { getApiUrl } from '@/lib/api-config';
+
+const API_URL = getApiUrl() || '';
 
 // Fetch testimonials from API
 async function getTestimonials() {
+  if (!API_URL) return [];
   try {
     const res = await fetch(`${API_URL}/api/testimonials?status=active`, {
       cache: 'no-store'
@@ -73,6 +76,7 @@ async function getTestimonials() {
 
 // Fetch clients from API
 async function getClients() {
+  if (!API_URL) return [];
   try {
     const res = await fetch(`${API_URL}/api/clients?status=active`, {
       cache: 'no-store'
@@ -86,6 +90,7 @@ async function getClients() {
 
 // Fetch featured case studies from API and transform for home page
 async function getFeaturedCaseStudies() {
+  if (!API_URL) return [];
   try {
     // First try to get featured case studies
     const featuredRes = await fetch(`${API_URL}/api/case-studies/featured?limit=6`, {
@@ -129,6 +134,7 @@ async function getFeaturedCaseStudies() {
 
 // Fetch industries data from dedicated industries page content
 async function getIndustries() {
+  if (!API_URL) return null;
   try {
     const res = await fetch(`${API_URL}/api/content/industries`, {
       cache: 'no-store'

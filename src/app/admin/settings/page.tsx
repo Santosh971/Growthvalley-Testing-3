@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { settingsAPI, mediaAPI } from '@/lib/admin-api';
 import { useAuth } from '@/lib/auth-context';
+import { getMediaUrl } from '@/lib/api-config';
 import AdminLayout from '../AdminLayout';
 
 interface SiteSettings {
@@ -67,10 +68,7 @@ export default function SettingsPage() {
 
   // Helper to get full URL for preview
   const getFullUrl = (path: string | undefined) => {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    return `${apiUrl}${path}`;
+    return getMediaUrl(path);
   };
 
   useEffect(() => {

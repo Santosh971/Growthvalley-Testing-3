@@ -2,6 +2,7 @@ import { getPublicPageContent } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic'; import PageHeader from "@/components/PageHeader";
 import { getPageContent, getSection, getPageSEO } from "@/lib/content";
+import { getApiUrl } from "@/lib/api-config";
 import { Metadata } from "next";
 import CompanyClient from "./CompanyClient";
 
@@ -17,8 +18,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getTeamMembers() {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    console.error('API URL not configured');
+    return [];
+  }
+
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:3001";
     const res = await fetch(
       `${apiUrl}/api/team`,
       { cache: "no-store" }

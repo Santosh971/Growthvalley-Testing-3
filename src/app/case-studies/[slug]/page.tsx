@@ -2,15 +2,19 @@ import Container from "@/components/Container";
 import Section from "@/components/Section";
 import PageHeader from "@/components/PageHeader";
 import Button from "@/components/Button";
+import { getApiUrl } from "@/lib/api-config";
 
-// API URL - use NEXT_PUBLIC_API_URL for both client and server components
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:3001";
+const API_URL = getApiUrl() || '';
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 async function getCaseStudy(slug: string) {
+  if (!API_URL) {
+    console.error('API URL not configured');
+    return null;
+  }
   try {
     const url = `${API_URL}/api/case-studies/${slug}`;
     console.log("Fetching case study from:", url);

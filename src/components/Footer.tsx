@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLogo, useSettings } from "@/lib/settings-context";
+import { getApiUrl } from "@/lib/api-config";
 
 interface FooterLink {
   name: string;
@@ -52,14 +53,15 @@ export default function Footer() {
 
   // Fetch dynamic links from API
   useEffect(() => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const apiUrl = getApiUrl();
+    if (!apiUrl) return;
 
     const fetchLinks = async () => {
       try {
         // Fetch both solutions and industries in parallel
         const [servicesRes, industriesRes] = await Promise.all([
-          fetch(`${API_URL}/api/content/services`, { cache: 'no-store' }),
-          fetch(`${API_URL}/api/content/industries`, { cache: 'no-store' })
+          fetch(`${apiUrl}/api/content/services`, { cache: 'no-store' }),
+          fetch(`${apiUrl}/api/content/industries`, { cache: 'no-store' })
         ]);
 
         // Process solutions/services

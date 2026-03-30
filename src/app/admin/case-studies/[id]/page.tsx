@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { caseStudyAPI } from '@/lib/admin-api';
+import { getApiUrl } from '@/lib/api-config';
 import AdminLayout from '../../AdminLayout';
 
 interface CaseStudy {
@@ -41,8 +42,15 @@ export default function EditCaseStudyPage() {
   }, []);
 
   const loadCaseStudy = async () => {
+    const apiUrl = getApiUrl();
+    if (!apiUrl) {
+      console.error('API URL not configured');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/case-studies/admin/${params.id}`, {
+      const response = await fetch(`${apiUrl}/api/case-studies/admin/${params.id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json',

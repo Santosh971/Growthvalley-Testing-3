@@ -1,5 +1,8 @@
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { getApiUrl } from './api-config';
+
+// Legacy export for backward compatibility
+const API_URL = getApiUrl() || '';
 
 
 // Utility function to generate slugs
@@ -26,18 +29,17 @@ export function truncate(text: string, length: number): string {
   return text.slice(0, length).trim() + '...';
 }
 // Get full URL for images/media
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { getMediaUrl } from './api-config';
 
 export const getImageUrl = (path?: string) => {
-  if (!path) return ''; // fallback if no image
-  if (path.startsWith('http')) return path; // full URL already
-  return `${API_BASE_URL}${path}`; // prepend backend URL
+  return getMediaUrl(path);
 };
 
 export async function fetchAPI(endpoint: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`
-  );
+  const apiUrl = getApiUrl();
+  if (!apiUrl) throw new Error('API URL not configured');
+
+  const res = await fetch(`${apiUrl}${endpoint}`);
 
   if (!res.ok) throw new Error('API Error');
 
@@ -47,13 +49,14 @@ export async function fetchAPI(endpoint: string) {
 // lib/publicApi.ts
 
 export async function getPageContent(page: string) {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.API_URL ||
-    "http://localhost:3001";
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    console.error('API URL not configured');
+    return null;
+  }
 
   const res = await fetch(`${apiUrl}/api/content/${page}`, {
-    cache: "no-store",   // 🔥 VERY IMPORTANT
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -66,9 +69,15 @@ export async function getPageContent(page: string) {
 
 // Fetch case studies from backend
 async function getCaseStudies() {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    console.error('API URL not configured');
+    return [];
+  }
+
   try {
-    const res = await fetch(`${API_URL}/api/case-studies?status=active`, {
-      cache: 'no-store', // always get fresh data
+    const res = await fetch(`${apiUrl}/api/case-studies?status=active`, {
+      cache: 'no-store',
     });
     const data = await res.json();
     return data.success ? data.data : [];

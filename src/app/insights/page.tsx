@@ -3,6 +3,7 @@ import Section from "@/components/Section";
 import PageHeader from "@/components/PageHeader";
 import Button from "@/components/Button";
 import Link from "next/link";
+import { getApiUrl } from "@/lib/api-config";
 
 export const metadata = {
   title: "Insights",
@@ -23,9 +24,15 @@ function getExcerpt(content: string, maxLength: number = 150): string {
 }
 
 async function getBlogs() {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    console.error('API URL not configured');
+    return [];
+  }
+
   try {
     const res = await fetch(
-      `${process.env.API_URL || "http://localhost:3001"}/api/blog`,
+      `${apiUrl}/api/blog`,
       { cache: "no-store" }
     );
     if (!res.ok) return [];

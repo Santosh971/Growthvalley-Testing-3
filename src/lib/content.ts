@@ -1,7 +1,8 @@
 // Content fetching utilities for frontend pages
 // Provides fallback content from defaults if API fails
+import { getApiUrl } from './api-config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = getApiUrl() || '';
 
 // Default content structures (same as backend)
 const defaultContent = {
@@ -463,6 +464,16 @@ function deepMergeSections<T extends Record<string, any>>(target: T, source: Par
  */
 export async function getPageContent(page: string): Promise<PageContent> {
   const pageKey = page.toLowerCase();
+
+  if (!API_URL) {
+    console.error('API URL not configured for content fetch');
+    return {
+      page: pageKey,
+      sections: getDefaultContent(pageKey),
+      seo: {},
+      isDefault: true
+    };
+  }
 
   try {
     const response = await fetch(`${API_URL}/api/content/${pageKey}`, {

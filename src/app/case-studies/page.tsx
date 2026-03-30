@@ -1,5 +1,6 @@
 import PageHeader from "@/components/PageHeader";
 import { getPageContent, getSection, getPageSEO } from "@/lib/content";
+import { getApiUrl } from "@/lib/api-config";
 import { Metadata } from "next";
 import CaseStudiesClient from "./CaseStudiesClient";
 
@@ -30,8 +31,13 @@ interface CTASection {
 }
 
 async function getCaseStudies(): Promise<CaseStudy[]> {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    console.error('API URL not configured');
+    return [];
+  }
+
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:3001";
     const res = await fetch(
       `${apiUrl}/api/case-studies`,
       { cache: "no-store" }

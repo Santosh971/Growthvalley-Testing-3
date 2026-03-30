@@ -3,15 +3,22 @@ import Section from "@/components/Section";
 import PageHeader from "@/components/PageHeader";
 import Button from "@/components/Button";
 import Link from "next/link";
+import { getApiUrl } from "@/lib/api-config";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 async function getBlogPost(slug: string) {
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    console.error('API URL not configured');
+    return null;
+  }
+
   try {
     const res = await fetch(
-      `${process.env.API_URL || "http://localhost:3001"}/api/blog/${slug}`,
+      `${apiUrl}/api/blog/${slug}`,
       { cache: "no-store" }
     );
     if (!res.ok) return null;

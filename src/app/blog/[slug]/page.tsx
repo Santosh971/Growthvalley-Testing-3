@@ -3,9 +3,9 @@ import Section from "@/components/Section";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getImageUrl } from "@/lib/utils";
+import { getApiUrl } from "@/lib/api-config";
 
-// API URL - use NEXT_PUBLIC_API_URL for both client and server components
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:3001";
+const API_URL = getApiUrl() || '';
 
 // Content block types
 interface ContentBlock {
@@ -102,6 +102,10 @@ interface Props {
 }
 
 async function getBlog(slug: string) {
+  if (!API_URL) {
+    console.error('API URL not configured');
+    return null;
+  }
   try {
     const url = `${API_URL}/api/blog/${slug}`;
     console.log("Fetching blog from:", url);
@@ -120,6 +124,7 @@ async function getBlog(slug: string) {
 }
 
 async function getRelatedBlogs(currentSlug: string, category: string) {
+  if (!API_URL) return [];
   try {
     const res = await fetch(
       `${API_URL}/api/blog`,
@@ -173,6 +178,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export async function generateStaticParams() {
+  if (!API_URL) return [];
   try {
     const res = await fetch(`${API_URL}/api/blog`);
     if (!res.ok) return [];

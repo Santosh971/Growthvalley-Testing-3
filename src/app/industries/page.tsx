@@ -1,5 +1,6 @@
 import PageHeader from "@/components/PageHeader";
 import { getPageContent, getSection, getPageSEO } from "@/lib/content";
+import { getApiUrl } from "@/lib/api-config";
 import { Metadata } from "next";
 import IndustriesClient from "./IndustriesClient";
 
@@ -20,9 +21,14 @@ const INDUSTRY_ID_TO_CASE_STUDY_MAP: Record<string, string[]> = {
 
 // Fetch case study counts from API
 async function getCaseStudyCounts(): Promise<Record<string, number>> {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    console.error('API URL not configured');
+    return {};
+  }
+
   try {
-    const response = await fetch(`${API_URL}/api/case-studies/industries`, {
+    const response = await fetch(`${apiUrl}/api/case-studies/industries`, {
       cache: 'no-store'
     });
     if (response.ok) {

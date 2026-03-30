@@ -1,7 +1,8 @@
 // Server-side settings fetching
 // This file runs on the server only and provides fresh settings
+import { getApiUrl } from './api-config';
 
-const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = getApiUrl() || '';
 
 // Default settings (duplicated to avoid circular dependency)
 const defaultSettings = {
