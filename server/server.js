@@ -24,141 +24,102 @@ connectDB();
 // Trust proxy (for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
 
-
-
-// app.use(
-//   helmet({
-//     contentSecurityPolicy: {
-//       directives: {
-//         defaultSrc: ["'self'"],
-
-//         styleSrc: ["'self'", "'unsafe-inline'"],
-//         scriptSrc: ["'self'"],
-
-//         // Allow Cloudinary URLs for images
-//         imgSrc: [
-//           "'self'",
-//           "data:",
-//           "https:",
-//           "http://localhost:3001",
-//           "https://res.cloudinary.com"
-//         ],
-
-//         connectSrc: [
-//           "'self'",
-//           "http://localhost:3001",
-//           "https://res.cloudinary.com",
-//           "https://growthvalley-testing-3.onrender.com"
-//         ],
-
-//         fontSrc: ["'self'"],
-//         objectSrc: ["'none'"],
-//         mediaSrc: ["'self'"],
-//         frameSrc: ["'none'"],
-//       },
-//     },
-
-//     crossOriginEmbedderPolicy: false,
-//   })
-// );
-
+// ============================================
+// Security Headers - Helmet
+// Note: CSP headers are removed for API server (CSP is for frontend HTML)
+// CORS handles cross-origin requests for APIs
+// ============================================
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
+    // Disable CSP for API server - CSP is for frontend HTML responses
+    contentSecurityPolicy: false,
 
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-
-        imgSrc: [
-          "'self'",
-          "data:",
-          "blob:",
-          "https:",
-          "http://localhost:3001",
-          "https://res.cloudinary.com"
-        ],
-
-        connectSrc: [
-          "'self'",
-          "http://localhost:3001",
-          "http://localhost:5173",
-          "https://res.cloudinary.com",
-          "https://growthvalley-testing-3.onrender.com"
-        ],
-
-        fontSrc: ["'self'", "data:"],
-
-        objectSrc: ["'none'"],
-
-        mediaSrc: [
-          "'self'",
-          "https://res.cloudinary.com"
-        ],
-
-        frameSrc: ["'self'"],
-
-        // ✅ VERY IMPORTANT (fixes many Next.js issues)
-        upgradeInsecureRequests: [],
-      },
-    },
-
+    // Allow cross-origin for images/media
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
 
-    // ✅ CRITICAL FIX (for your error)
-    crossOriginResourcePolicy: false,
+    // Keep other security headers
+    frameguard: { action: 'deny' },
+    noSniff: true,
+    xssFilter: true,
   })
 );
 
+// ============================================
+// CORS Configuration - MUST be configured before any routes
+// ============================================
 const allowedOrigins = [
+  // Local development origins
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://growthvalley-testing-3.vercel.app"
-];
+  "http://localhost:3001",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  "http://127.0.0.1:5173",
+  // Production origins - Vercel deployments
+  "https://growthvalley-testing-3.vercel.app",
+  // Add the env configured frontend URL
+  config.frontendUrl,
+].filter(Boolean); // Remove any undefined values
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+// CORS configuration with proper preflight handling
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+    if (!origin) {
+      return callback(null, true);
+    }
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log("Blocked by CORS:", origin);
-        callback(null, false); // 👈 DON'T throw error
-      }
-    },
-    credentials: true,
-  })
-);
-// ✅ VERY IMPORTANT (fixes preflight issue)
-app.options("*", cors());
+    // Check if origin is allowed
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // Log blocked origins for debugging
+      console.log(`[CORS] Blocked origin: ${origin}`);
+      console.log(`[CORS] Allowed origins:`, allowedOrigins);
+      // Return proper error to client
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // Allow cookies/authorization headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'X-Refresh-Token',
+    'Cache-Control',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
+  maxAge: 86400, // Preflight cache for 24 hours
+  optionsSuccessStatus: 204 // Some browsers choke on 200
+};
 
-// app.use(cors({
-//   origin: true, // allow all origins
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Accept', 'Origin'],
-// }));
+// Apply CORS to all routes
+app.use(cors(corsOptions));
+
+// Handle preflight for all routes explicitly (ensures OPTIONS gets proper headers)
+app.options('*', cors(corsOptions));
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files for uploads
-// app.use('/uploads', express.static(path.join(__dirname, config.upload.dir)));
-// app.use(
-//   "/uploads",
-//   express.static(path.join(process.cwd(), "uploads"), {
-//     setHeaders: (res) => {
-//       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-//     },
-//   })
-// );
+// Static files for uploads - with CORS headers for cross-origin access
 app.use(
   "/uploads",
-  express.static(path.join(process.cwd(), "uploads"))
+  express.static(path.join(process.cwd(), "uploads"), {
+    setHeaders: (res, path) => {
+      // Allow cross-origin access to uploaded files
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      // Cache images for performance
+      if (path.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000");
+      }
+    },
+  })
 );
 
 // Apply rate limiting to all routes
@@ -171,7 +132,11 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     environment: config.nodeEnv,
-    version: '2.0.0'
+    version: '2.0.0',
+    cors: {
+      allowedOrigins: allowedOrigins,
+      requestOrigin: req.headers.origin || 'none'
+    }
   });
 });
 
@@ -203,6 +168,15 @@ app.use('/api/*', (req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+
+  // CORS error - return proper response
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      success: false,
+      message: 'Origin not allowed by CORS policy',
+      error: 'CORS_BLOCKED'
+    });
+  }
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
