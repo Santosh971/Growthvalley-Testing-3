@@ -12,7 +12,8 @@
  * @returns The API URL (throws in production if not configured)
  */
 export function getApiUrl(): string | null {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
+  const base_url = "https://growthvalley-testing-3.onrender.com"
+  const envUrl = base_url || process.env.API_URL;
 
   if (envUrl) {
     return envUrl;
