@@ -4,7 +4,7 @@ import { getApiUrl } from "@/lib/api-config";
 // Proxy to backend API server
 
 export async function GET(request: NextRequest) {
-  const apiUrl = getApiUrl();
+  const apiUrl = "https://growthvalley-testing-3.onrender.com";
   if (!apiUrl) {
     return NextResponse.json(
       { error: "API URL not configured" },

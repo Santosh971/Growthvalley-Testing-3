@@ -102,4 +102,4 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export {}; // Make this a module
+export { }; // Make this a module
