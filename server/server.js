@@ -46,62 +46,77 @@ app.use(
 );
 
 // ============================================
+// CORS Configuration - ALLOW ALL ORIGINS
+// ============================================
+app.use(cors()); // allow all origins
+app.options("*", cors()); // handle preflight requests
+
+
+// ============================================
 // CORS Configuration - MUST be configured before any routes
 // ============================================
-const allowedOrigins = [
-  // Local development origins
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "http://localhost:3001",
-  "http://127.0.0.1:3000",
-  "http://127.0.0.1:3001",
-  "http://127.0.0.1:5173",
-  // Production origins - Vercel deployments
-  "https://growthvalley-testing-3.vercel.app",
-  // Add the env configured frontend URL
-  config.frontendUrl,
-].filter(Boolean); // Remove any undefined values
+// const allowedOrigins = [
+//   // Local development origins
+//   "http://localhost:3000",
+//   "http://localhost:5173",
+//   "http://localhost:3001",
+//   "http://127.0.0.1:3000",
+//   "http://127.0.0.1:3001",
+//   "http://127.0.0.1:5173",
+//   // Production origins - Vercel deployments
+//   "https://growthvalley-testing-3.vercel.app",
+//   // Add the env configured frontend URL
+//   config.frontendUrl,
+// ].filter(Boolean); // Remove any undefined values
 
 // CORS configuration with proper preflight handling
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
-    if (!origin) {
-      return callback(null, true);
-    }
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+//     if (!origin) {
+//       return callback(null, true);
+//     }
 
-    // Check if origin is allowed
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // Log blocked origins for debugging
-      console.log(`[CORS] Blocked origin: ${origin}`);
-      console.log(`[CORS] Allowed origins:`, allowedOrigins);
-      // Return proper error to client
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true, // Allow cookies/authorization headers
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'X-Refresh-Token',
-    'Cache-Control',
-    'Accept',
-    'Origin'
-  ],
-  exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
-  maxAge: 86400, // Preflight cache for 24 hours
-  optionsSuccessStatus: 204 // Some browsers choke on 200
-};
+//     // Check if origin is allowed
+//     if (allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       // Log blocked origins for debugging
+//       console.log(`[CORS] Blocked origin: ${origin}`);
+//       console.log(`[CORS] Allowed origins:`, allowedOrigins);
+//       // Return proper error to client
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true, // Allow cookies/authorization headers
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+//   allowedHeaders: [
+//     'Content-Type',
+//     'Authorization',
+//     'X-Requested-With',
+//     'X-Refresh-Token',
+//     'Cache-Control',
+//     'Accept',
+//     'Origin'
+//   ],
+//   exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
+//   maxAge: 86400, // Preflight cache for 24 hours
+//   optionsSuccessStatus: 204 // Some browsers choke on 200
+// };
 
 // Apply CORS to all routes
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+
+// app.use(
+//   cors({
+//     origin: "*", // allow all
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
 
 // Handle preflight for all routes explicitly (ensures OPTIONS gets proper headers)
-app.options('*', cors(corsOptions));
+// app.options('*', cors(corsOptions));
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
@@ -134,9 +149,13 @@ app.get('/api/health', (req, res) => {
     environment: config.nodeEnv,
     version: '2.0.0',
     cors: {
-      allowedOrigins: allowedOrigins,
+      allowedOrigins: "ALL",
       requestOrigin: req.headers.origin || 'none'
     }
+    // cors: {
+    //   allowedOrigins: allowedOrigins,
+    //   requestOrigin: req.headers.origin || 'none'
+    // }
   });
 });
 
